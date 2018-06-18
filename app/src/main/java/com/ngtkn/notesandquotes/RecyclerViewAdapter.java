@@ -1,0 +1,67 @@
+package com.ngtkn.notesandquotes;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+
+class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.NotesViewHolder> {
+    private static final String TAG = "RecyclerViewAdapter";
+    private ArrayList<String> notes;
+    private Context context;
+
+    public RecyclerViewAdapter(Context context, ArrayList<String> notes) {
+        this.notes = notes;
+        this.context = context;
+    }
+
+    @NonNull
+    @Override
+    public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.d(TAG, "onCreateViewHolder: starts");
+        // Called by the layout manager when it needs a new view
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_layout, parent, false);
+        NotesViewHolder viewHolder = new NotesViewHolder(view);
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
+        Log.d(TAG, "onBindViewHolder: starts");
+        // Called by recycler view for new data to be stored in a view holder, to display
+        holder.noteView.setText(notes.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        Log.d(TAG, "getItemCount: starts");
+        return ((notes != null) && (notes.size() != 0) ? notes.size() : 0);
+    }
+
+    void loadNewData(ArrayList<String> newNotes) { ;
+        notes = newNotes;
+        notifyDataSetChanged();
+    }
+
+    public String getNote(int position){
+        return ((notes != null) && (notes.size() != 0) ? notes.get(position) : null);
+    }
+
+    static class NotesViewHolder extends RecyclerView.ViewHolder {
+        private static final String TAG = "NotesViewHolder";
+        TextView noteView = null;
+
+        public NotesViewHolder(View itemView) {
+            super(itemView);
+            Log.d(TAG, "NotesViewHolder: starts");
+            this.noteView = (TextView) itemView.findViewById(R.id.notes_text_view);
+        }
+    }
+
+}
