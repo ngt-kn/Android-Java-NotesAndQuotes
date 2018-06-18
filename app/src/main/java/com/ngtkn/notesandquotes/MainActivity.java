@@ -1,7 +1,10 @@
 package com.ngtkn.notesandquotes;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -18,16 +21,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private final String ADD = "ADD";
+    private static final String ADD = "ADD";
     private static final String EDIT = "EDIT";
+    private static final String ID = "NOTES";
     private RecyclerViewAdapter recyclerViewAdapter;
-    ArrayList<String> noteList = new ArrayList<>();
-    Notes notes;
+    private Notes notes;
     private String newEntry = "";
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +59,14 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-
         notes = new Notes();
+        loadSharedPreferences();
 
-        loadNotes();
+        if(notes.notes.size() == 0){
+            loadNotes();
+        } else {
+            recyclerViewAdapter.loadNewData(notes.getNotes());
+        }
     }
 
     @Override
@@ -107,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!TextUtils.isEmpty(newEntry)){
                     notes.addNewNote(newEntry);
                     recyclerViewAdapter.loadNewData(notes.getNotes());
+                    save();
                 }
             }
         });
@@ -122,12 +134,35 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadNotes(){
         Log.d(TAG, "loadNotes: starts");
-        notes.addNewNote("1");
-        notes.addNewNote("2");
-        notes.addNewNote("3");
-        notes.addNewNote("4");
-        notes.addNewNote("5");
-
+        notes.addNewNote("Add a new note with + in toolbar. Generate a quote with floating button");
         recyclerViewAdapter.loadNewData(notes.getNotes());
+    }
+
+    private void save(){
+        sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
+
+        JSONArray jsonArray = new JSONArray(notes.getNotes());
+        for(int i = 0; i < jsonArray.length(); i++){
+            try {
+                Log.d(TAG, "save: " + jsonArray.get(i).toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        sharedPreferences.edit().putString(ID, jsonArray.toString()).apply();
+    }
+
+    private void loadSharedPreferences(){
+        Log.d(TAG, "loadSharedPreferences: start");
+        sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
+        try {
+            JSONArray jsonArray = new JSONArray(sharedPreferences.getString(ID, "[]"));
+            for (int i=0; i < jsonArray.length(); i++){
+                notes.addNewNote(jsonArray.getString(i));
+                Log.d(TAG, "loadSharedPreferences: get(i) " + jsonArray.getString(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

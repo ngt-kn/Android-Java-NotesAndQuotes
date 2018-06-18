@@ -14,6 +14,10 @@ class Notes {
         return notes;
     }
 
+    public String getNote(int position){
+        return notes.get(position);
+    }
+
     void addNewNote(String s){
         //TODO: method to add a new note to the array list
         notes.add(s);
