@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -20,13 +19,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerClickListener.OnRecyclerClickListener {
     private static final String TAG = "MainActivity";
     private static final String ADD = "ADD";
     private static final String EDIT = "EDIT";
@@ -53,11 +53,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
-
         recyclerViewAdapter = new RecyclerViewAdapter(this, new ArrayList<String>());
         recyclerView.setAdapter(recyclerViewAdapter);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addOnItemTouchListener(new RecyclerClickListener(this, recyclerView, this));
 
         notes = new Notes();
         loadSharedPreferences();
@@ -164,5 +163,16 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this, "normal click @ position " + position, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+        Toast.makeText(this, "long click @ position " + position, Toast.LENGTH_SHORT).show();
     }
 }
