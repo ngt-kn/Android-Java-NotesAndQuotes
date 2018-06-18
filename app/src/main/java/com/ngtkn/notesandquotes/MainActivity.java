@@ -23,8 +23,10 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private final String NEW_ENTRY = "NEW_ENTRY";
     private RecyclerViewAdapter recyclerViewAdapter;
-    ArrayList<String> notes = new ArrayList<>();;
+    ArrayList<String> noteList = new ArrayList<>();
+    Notes notes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +52,11 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
+        notes = new Notes(noteList);
+
         loadNotes();
 
-        deleteNote(0);
 
-        Quotes quotes = new Quotes();
-        String s;
     }
 
     @Override
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.action_add) {
             Intent intent = new Intent(this, AddNew.class);
-            startActivity(intent`);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -87,11 +88,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadNotes(){
         Log.d(TAG, "loadNotes: starts");
-        notes.add("1");
-        notes.add("2");
-        notes.add("3");
-        notes.add("4");
-        notes.add("5");
+        notes.addNewNote("1");
+        notes.addNewNote("2");
+        notes.addNewNote("3");
+        notes.addNewNote("4");
+        notes.addNewNote("5");
 //        notes.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
 //                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
 //                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
@@ -122,24 +123,6 @@ public class MainActivity extends AppCompatActivity {
 //                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
 //                "fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa " +
 //                "qui officia deserunt mollit anim id est laborum");
-
-        Log.d(TAG, "loadNotes: ends size " + notes.size() );
-        //initRecyclerView();
-        recyclerViewAdapter.loadNewData(notes);
-    }
-
-    void addNewNote(String s){
-        //TODO: method to add a new note to the array list
-        notes.add(s);
-        recyclerViewAdapter.loadNewData(notes);
-    }
-
-    void editNote(){
-        //TODO: method to edit existing note
-    }
-
-    void deleteNote(int position){
-        //TODO: method to delete note from array
-        notes.remove(position);
+        recyclerViewAdapter.loadNewData(notes.getNotes());
     }
 }
