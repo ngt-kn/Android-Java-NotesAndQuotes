@@ -1,7 +1,6 @@
 package com.ngtkn.notesandquotes;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -13,29 +12,31 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private final String NEW_ENTRY = "NEW_ENTRY";
+    private final String ADD = "ADD";
+    private static final String EDIT = "EDIT";
     private RecyclerViewAdapter recyclerViewAdapter;
     ArrayList<String> noteList = new ArrayList<>();
     Notes notes;
+    private String newEntry = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
 
         recyclerViewAdapter = new RecyclerViewAdapter(this, new ArrayList<String>());
         recyclerView.setAdapter(recyclerViewAdapter);
@@ -52,11 +53,9 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        notes = new Notes(noteList);
+        notes = new Notes();
 
         loadNotes();
-
-
     }
 
     @Override
@@ -79,11 +78,46 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_add) {
-            Intent intent = new Intent(this, AddNew.class);
-            startActivity(intent);
+            editNotes("Add New", ADD);
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void editNotes(String title, String action){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setSingleLine(false);  //add this
+        input.setLines(4);
+        input.setMaxLines(5);
+        input.setGravity(Gravity.START | Gravity.TOP);
+        input.setHorizontalScrollBarEnabled(false); //this
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                newEntry = input.getText().toString();
+                if(!TextUtils.isEmpty(newEntry)){
+                    notes.addNewNote(newEntry);
+                    recyclerViewAdapter.loadNewData(notes.getNotes());
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     private void loadNotes(){
@@ -93,36 +127,7 @@ public class MainActivity extends AppCompatActivity {
         notes.addNewNote("3");
         notes.addNewNote("4");
         notes.addNewNote("5");
-//        notes.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
-//                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-//                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
-//                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
-//                "fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa " +
-//                "qui officia deserunt mollit anim id est laborum");
-//        notes.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
-//                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-//                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
-//                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
-//                "fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa " +
-//                "qui officia deserunt mollit anim id est laborum");
-//        notes.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
-//                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-//                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
-//                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
-//                "fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa " +
-//                "qui officia deserunt mollit anim id est laborum");
-//        notes.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
-//                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-//                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
-//                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
-//                "fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa " +
-//                "qui officia deserunt mollit anim id est laborum");
-//        notes.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
-//                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-//                "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
-//                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
-//                "fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa " +
-//                "qui officia deserunt mollit anim id est laborum");
+
         recyclerViewAdapter.loadNewData(notes.getNotes());
     }
 }

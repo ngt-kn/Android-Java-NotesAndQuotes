@@ -7,8 +7,7 @@ import java.util.ArrayList;
 class Notes {
     ArrayList<String> notes = new ArrayList<>();
 
-    public Notes(ArrayList<String> notes) {
-        this.notes = notes;
+    public Notes() {
     }
 
     public ArrayList<String> getNotes() {
@@ -29,5 +28,7 @@ class Notes {
         notes.remove(position);
     }
 
-
+    public void setNotes(ArrayList<String> notes) {
+        this.notes = notes;
+    }
 }
