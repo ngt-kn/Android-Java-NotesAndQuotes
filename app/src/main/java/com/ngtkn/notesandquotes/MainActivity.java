@@ -18,6 +18,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -61,10 +62,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         notes = new Notes();
         loadSharedPreferences();
 
-        if(notes.notes.size() == 0){
+        if(notes.getSize() == 0){
             loadNotes();
         } else {
-            recyclerViewAdapter.loadNewData(notes.getNotes());
+            recyclerViewAdapter.loadNewData(notes.getNoteList());
         }
     }
 
@@ -88,13 +89,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         }
 
         if (id == R.id.action_add) {
-            editNotes("Add New", ADD);
+            editNotes("Add New", ADD, "", 0);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void editNotes(String title, String action){
+    private void editNotes(String title, final String action, String body, final int position){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
 
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         final EditText input = new EditText(this);
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setText(body);
         input.setSingleLine(false);  //add this
         input.setLines(4);
         input.setMaxLines(5);
@@ -115,8 +117,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             public void onClick(DialogInterface dialog, int which) {
                 newEntry = input.getText().toString();
                 if(!TextUtils.isEmpty(newEntry)){
-                    notes.addNewNote(newEntry);
-                    recyclerViewAdapter.loadNewData(notes.getNotes());
+                    if(action.equals(ADD)){
+                        notes.addNewNote(newEntry);
+                    }
+                    if(action.equals(EDIT)){
+                        notes.editNote(newEntry, position);
+                    }
+                    recyclerViewAdapter.loadNewData(notes.getNoteList());
                     save();
                 }
             }
@@ -131,24 +138,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         builder.show();
     }
 
+
     private void loadNotes(){
-        Log.d(TAG, "loadNotes: starts");
-        notes.addNewNote("Add a new note with + in toolbar. Generate a quote with floating button");
-        recyclerViewAdapter.loadNewData(notes.getNotes());
-    }
-
-    private void save(){
-        sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
-
-        JSONArray jsonArray = new JSONArray(notes.getNotes());
-        for(int i = 0; i < jsonArray.length(); i++){
-            try {
-                Log.d(TAG, "save: " + jsonArray.get(i).toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        sharedPreferences.edit().putString(ID, jsonArray.toString()).apply();
+        // Shows once when user first starts app
+        notes.addNewNote("Add a new note with + in toolbar. Generate a quote with floating button located at bottom.");
+        recyclerViewAdapter.loadNewData(notes.getNoteList());
     }
 
     private void loadSharedPreferences(){
@@ -165,6 +159,19 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         }
     }
 
+    private void save(){
+        sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
+
+        JSONArray jsonArray = new JSONArray(notes.getNoteList());
+        for(int i = 0; i < jsonArray.length(); i++){
+            try {
+                Log.d(TAG, "save: " + jsonArray.get(i).toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        sharedPreferences.edit().putString(ID, jsonArray.toString()).apply();
+    }
 
     @Override
     public void onItemClick(View view, int position) {
@@ -172,7 +179,47 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     @Override
-    public void onItemLongClick(View view, int position) {
+    public void onItemLongClick(final View view, final int position) {
         Toast.makeText(this, "long click @ position " + position, Toast.LENGTH_SHORT).show();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        View v = getLayoutInflater().inflate(R.layout.long_click_dialogue, null);
+        Button btnDisplay = v.findViewById(R.id.btnDisplay);
+        Button btnEdit = v.findViewById(R.id.btnEdit);
+        Button btnDelete = v.findViewById(R.id.btnDelete);
+        builder.setView(v);
+        final AlertDialog dialog = builder.create();
+
+        btnDisplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Display", Toast.LENGTH_SHORT ).show();
+                dialog.dismiss();
+            }
+        });
+
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(MainActivity.this, "edit " + notes.getNote(position) + " " + position, Toast.LENGTH_SHORT ).show();
+                editNotes("Edit", EDIT, notes.getNote(position), position);
+                dialog.dismiss();
+            }
+        });
+
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               //Toast.makeText(MainActivity.this, "Delete", Toast.LENGTH_SHORT ).show();
+                if(position < notes.getSize()){
+                    notes.deleteNote(position);
+                    save();
+                    recyclerViewAdapter.loadNewData(notes.getNoteList());
+                }
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 }

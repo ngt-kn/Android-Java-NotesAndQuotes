@@ -4,13 +4,13 @@ import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-class Notes {
+class Notes extends ArrayList<String> {
     ArrayList<String> notes = new ArrayList<>();
 
     public Notes() {
     }
 
-    public ArrayList<String> getNotes() {
+    public ArrayList<String> getNoteList() {
         return notes;
     }
 
@@ -22,17 +22,19 @@ class Notes {
         //TODO: method to add a new note to the array list
         notes.add(s);
     }
-
-    void editNote(){
-        //TODO: method to edit existing note
+    void editNote(String s, int position){
+        notes.set(position, s);
     }
-
     void deleteNote(int position){
         //TODO: method to delete note from array
         notes.remove(position);
     }
 
-    public void setNotes(ArrayList<String> notes) {
+    int getSize(){
+        return ((notes != null) ? notes.size() : 0);
+    }
+
+    void setNotes(ArrayList<String> notes) {
         this.notes = notes;
     }
 }
