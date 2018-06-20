@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -43,13 +44,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        final Quotes quotes = new Quotes();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar snackbar = Snackbar.make(view, quotes.getNewQuote(MainActivity.this), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null);
+                View snackbarView = snackbar.getView();
+                TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+                textView.setMaxLines(5);
+                snackbar.show();
             }
         });
 
@@ -146,13 +152,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     private void loadSharedPreferences(){
-        Log.d(TAG, "loadSharedPreferences: start");
         sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
         try {
             JSONArray jsonArray = new JSONArray(sharedPreferences.getString(ID, "[]"));
-            for (int i=0; i < jsonArray.length(); i++){
+            int len = jsonArray.length();
+            for (int i=0; i < len; i++){
                 notes.addNewNote(jsonArray.getString(i));
-                Log.d(TAG, "loadSharedPreferences: get(i) " + jsonArray.getString(i));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -163,7 +168,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
 
         JSONArray jsonArray = new JSONArray(notes.getNoteList());
-        for(int i = 0; i < jsonArray.length(); i++){
+        int len = jsonArray.length();
+        for(int i = 0; i < len; i++){
             try {
                 Log.d(TAG, "save: " + jsonArray.get(i).toString());
             } catch (JSONException e) {
@@ -175,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     @Override
     public void onItemClick(View view, int position) {
+        // TODO: Remove this scaffolding
         Toast.makeText(this, "normal click @ position " + position, Toast.LENGTH_SHORT).show();
     }
 
@@ -182,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     public void onItemLongClick(final View view, final int position) {
         Toast.makeText(this, "long click @ position " + position, Toast.LENGTH_SHORT).show();
 
+        // Set up the custom dialog for display, edit, and delete methods
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         View v = getLayoutInflater().inflate(R.layout.long_click_dialogue, null);
         Button btnDisplay = v.findViewById(R.id.btnDisplay);
@@ -190,10 +198,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         builder.setView(v);
         final AlertDialog dialog = builder.create();
 
+        // Set onclicklistener for
         btnDisplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Display", Toast.LENGTH_SHORT ).show();
+                //TODO: add display method for widget
                 dialog.dismiss();
             }
         });
@@ -201,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(MainActivity.this, "edit " + notes.getNote(position) + " " + position, Toast.LENGTH_SHORT ).show();
                 editNotes("Edit", EDIT, notes.getNote(position), position);
                 dialog.dismiss();
             }
@@ -210,7 +218,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               //Toast.makeText(MainActivity.this, "Delete", Toast.LENGTH_SHORT ).show();
                 if(position < notes.getSize()){
                     notes.deleteNote(position);
                     save();

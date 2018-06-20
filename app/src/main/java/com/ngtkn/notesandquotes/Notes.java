@@ -5,13 +5,18 @@ import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 
 class Notes extends ArrayList<String> {
-    ArrayList<String> notes = new ArrayList<>();
+    static ArrayList<String> notes;
 
     public Notes() {
+        notes = new ArrayList<>();
     }
 
     public ArrayList<String> getNoteList() {
         return notes;
+    }
+
+    void setNotes(ArrayList<String> notes) {
+        this.notes = notes;
     }
 
     public String getNote(int position){
@@ -19,14 +24,14 @@ class Notes extends ArrayList<String> {
     }
 
     void addNewNote(String s){
-        //TODO: method to add a new note to the array list
         notes.add(s);
     }
+
     void editNote(String s, int position){
         notes.set(position, s);
     }
+
     void deleteNote(int position){
-        //TODO: method to delete note from array
         notes.remove(position);
     }
 
@@ -34,7 +39,5 @@ class Notes extends ArrayList<String> {
         return ((notes != null) ? notes.size() : 0);
     }
 
-    void setNotes(ArrayList<String> notes) {
-        this.notes = notes;
-    }
+
 }
