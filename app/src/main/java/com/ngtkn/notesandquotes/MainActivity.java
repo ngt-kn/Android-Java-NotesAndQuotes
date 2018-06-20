@@ -1,5 +1,7 @@
 package com.ngtkn.notesandquotes;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -20,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private RecyclerViewAdapter recyclerViewAdapter;
     private Notes notes;
     private String newEntry = "";
+    private static int currentWidgetPosition;
     SharedPreferences sharedPreferences;
 
     @Override
@@ -50,12 +54,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar snackbar = Snackbar.make(view, quotes.getNewQuote(MainActivity.this), Snackbar.LENGTH_LONG)
+                String s = quotes.getNewQuote(MainActivity.this);
+                Snackbar snackbar = Snackbar.make(view, s, Snackbar.LENGTH_LONG)
                         .setAction("Action", null);
                 View snackbarView = snackbar.getView();
                 TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
                 textView.setMaxLines(5);
                 snackbar.show();
+                updateWidgetText(MainActivity.this, s);
             }
         });
 
@@ -202,7 +208,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         btnDisplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: add display method for widget
+                updateWidgetText(MainActivity.this, notes.getNote(position));
+                currentWidgetPosition = position;
                 dialog.dismiss();
             }
         });
@@ -222,11 +229,24 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                     notes.deleteNote(position);
                     save();
                     recyclerViewAdapter.loadNewData(notes.getNoteList());
+                    if(position == currentWidgetPosition){
+                        updateWidgetText(MainActivity.this, "...");
+                        currentWidgetPosition = -1;
+                    } else if (position < currentWidgetPosition){
+                        currentWidgetPosition -= 1;
+                    }
                 }
                 dialog.dismiss();
             }
         });
 
         dialog.show();
+    }
+    void updateWidgetText(Context context, String s){
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
+        ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
+        remoteViews.setTextViewText(R.id.appwidget_text, s);
+        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
     }
 }

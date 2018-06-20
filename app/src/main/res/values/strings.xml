@@ -2,4 +2,6 @@
     <string name="app_name">NotesAndQuotes</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_add_new">Add New</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
