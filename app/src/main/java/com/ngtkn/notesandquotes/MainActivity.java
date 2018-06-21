@@ -39,7 +39,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private static final String ID = "NOTES";
     private RecyclerViewAdapter recyclerViewAdapter;
     static private Notes notes;
-    private String newEntry = "";
+    static String newEntry = "";
+    static String newQuote = "";
     private static int widgetNotePosition;
     SharedPreferences sharedPreferences;
 
@@ -55,15 +56,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s = quotes.getNewQuote(MainActivity.this);
-                Snackbar snackbar = Snackbar.make(view, s, Snackbar.LENGTH_LONG)
+                newQuote = quotes.getNewQuote(MainActivity.this);
+                Snackbar snackbar = Snackbar.make(view, newQuote, Snackbar.LENGTH_LONG)
                         .setAction("Action", null);
                 View snackbarView = snackbar.getView();
                 TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
                 textView.setMaxLines(5);
+                snackbar.setAction("Display", new SnackbarDisplayListener());
                 snackbar.show();
-                updateWidgetText(MainActivity.this, s);
-                widgetNotePosition = -1;
             }
         });
 
@@ -83,6 +83,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         }
     }
 
+    class SnackbarDisplayListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            updateWidgetText(MainActivity.this, newQuote);
+            widgetNotePosition = -1;
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -254,3 +261,4 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         appWidgetManager.updateAppWidget(displayWidget, remoteViews);
     }
 }
+
