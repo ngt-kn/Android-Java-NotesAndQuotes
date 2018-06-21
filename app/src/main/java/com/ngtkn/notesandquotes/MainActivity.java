@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private static final String EDIT = "EDIT";
     private static final String ID = "NOTES";
     private RecyclerViewAdapter recyclerViewAdapter;
-    private Notes notes;
+    static private Notes notes;
     private String newEntry = "";
     private static int widgetNotePosition;
     SharedPreferences sharedPreferences;

@@ -43,8 +43,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner3"
-        app:layout_constraintVertical_bias="0.13999999" />
+        app:layout_constraintTop_toBottomOf="@+id/spinner_font_size"
+        app:layout_constraintVertical_bias="0.100000024" />
 
     <Spinner
         android:id="@+id/spinner_color"
@@ -59,18 +59,8 @@
         app:layout_constraintStart_toEndOf="@+id/textViewFontColor"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textViewFontType"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Widget Font"
-        app:layout_constraintEnd_toEndOf="@+id/textViewFontSize"
-        app:layout_constraintStart_toStartOf="@+id/textViewFontSize"
-        app:layout_constraintTop_toBottomOf="@+id/textViewFontSize" />
-
     <Spinner
-        android:id="@+id/spinner2"
+        android:id="@+id/spinner_font_size"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
@@ -82,16 +72,4 @@
         app:layout_constraintStart_toEndOf="@+id/textViewFontSize"
         app:layout_constraintTop_toBottomOf="@+id/spinner_color" />
 
-    <Spinner
-        android:id="@+id/spinner3"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textViewFontType"
-        app:layout_constraintTop_toBottomOf="@+id/spinner2" />
 </android.support.constraint.ConstraintLayout>
