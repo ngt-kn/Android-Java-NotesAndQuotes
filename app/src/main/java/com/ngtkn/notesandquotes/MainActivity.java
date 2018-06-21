@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private RecyclerViewAdapter recyclerViewAdapter;
     private Notes notes;
     private String newEntry = "";
-    private static int currentWidgetPosition;
+    private static int widgetNotePosition;
     SharedPreferences sharedPreferences;
 
     @Override
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                 textView.setMaxLines(5);
                 snackbar.show();
                 updateWidgetText(MainActivity.this, s);
+                widgetNotePosition = -1;
             }
         });
 
@@ -97,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -209,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             @Override
             public void onClick(View v) {
                 updateWidgetText(MainActivity.this, notes.getNote(position));
-                currentWidgetPosition = position;
+                widgetNotePosition = position;
                 dialog.dismiss();
             }
         });
@@ -229,11 +233,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                     notes.deleteNote(position);
                     save();
                     recyclerViewAdapter.loadNewData(notes.getNoteList());
-                    if(position == currentWidgetPosition){
+                    if(position == widgetNotePosition){
                         updateWidgetText(MainActivity.this, "...");
-                        currentWidgetPosition = -1;
-                    } else if (position < currentWidgetPosition){
-                        currentWidgetPosition -= 1;
+                        widgetNotePosition = -1;
+                    } else if (position < widgetNotePosition){
+                        widgetNotePosition -= 1;
                     }
                 }
                 dialog.dismiss();
