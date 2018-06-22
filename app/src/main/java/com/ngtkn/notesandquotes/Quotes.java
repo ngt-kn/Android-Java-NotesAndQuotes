@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 class Quotes {
-    private static final String TAG = "Quotes";
     static ArrayList<String> quotes;
     private int index = -1;
 
@@ -25,13 +24,12 @@ class Quotes {
     void loadFromText(Context context){
         try{
             AssetManager asset = context.getAssets();
-            InputStream in = asset.open("test.txt");
+            InputStream in = asset.open("quotes.txt");
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String line = bufferedReader.readLine();
             while ((line=bufferedReader.readLine()) != null){
                 quotes.add(line);
-                Log.d(TAG, "loadFromText: " + line);
             }
         }catch (IOException e){
             e.printStackTrace();
@@ -41,7 +39,6 @@ class Quotes {
     // Return a new random quote
     String getNewQuote(Context context){
         Random rand = new Random();
-        
         if(quotes.size() == 0){
             // Load quotes from text file, return random quote
             loadFromText(context);

@@ -25,7 +25,6 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Notes
     @NonNull
     @Override
     public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(TAG, "onCreateViewHolder: starts");
         // Called by the layout manager when it needs a new view
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_layout, parent, false);
         NotesViewHolder viewHolder = new NotesViewHolder(view);
@@ -34,14 +33,12 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Notes
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder: starts");
         // Called by recycler view for new data to be stored in a view holder, to display
         holder.noteView.setText(notes.get(position));
     }
 
     @Override
     public int getItemCount() {
-        Log.d(TAG, "getItemCount: starts");
         return ((notes != null) && (notes.size() != 0) ? notes.size() : 0);
     }
 
@@ -60,7 +57,6 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Notes
 
         public NotesViewHolder(View itemView) {
             super(itemView);
-            Log.d(TAG, "NotesViewHolder: starts");
             this.noteView = (TextView) itemView.findViewById(R.id.notes_text_view);
         }
     }

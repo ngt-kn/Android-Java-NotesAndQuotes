@@ -25,7 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     static String newEntry = "";
     static String newQuote = "";
     private static int widgetNotePosition;
-    SharedPreferences sharedPreferences;
+    static SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +169,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     private void loadSharedPreferences(){
-        sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
+        sharedPreferences = getApplicationContext()
+                .getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
         try {
             JSONArray jsonArray = new JSONArray(sharedPreferences.getString(ID, "[]"));
             int len = jsonArray.length();
@@ -182,30 +183,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     private void save(){
-        sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
-
         JSONArray jsonArray = new JSONArray(notes.getNoteList());
-        int len = jsonArray.length();
-        for(int i = 0; i < len; i++){
-            try {
-                Log.d(TAG, "save: " + jsonArray.get(i).toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
         sharedPreferences.edit().putString(ID, jsonArray.toString()).apply();
     }
 
     @Override
     public void onItemClick(View view, int position) {
-        // TODO: Remove this scaffolding
-        Toast.makeText(this, "normal click @ position " + position, Toast.LENGTH_SHORT).show();
+        // TODO: ??
     }
 
     @Override
     public void onItemLongClick(final View view, final int position) {
-        Toast.makeText(this, "long click @ position " + position, Toast.LENGTH_SHORT).show();
-
         // Set up the custom dialog for display, edit, and delete methods
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         View v = getLayoutInflater().inflate(R.layout.long_click_dialogue, null);
@@ -250,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                 dialog.dismiss();
             }
         });
-
         dialog.show();
     }
     void updateWidgetText(Context context, String s){

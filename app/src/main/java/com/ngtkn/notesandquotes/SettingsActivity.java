@@ -16,10 +16,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RemoteViews;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 public class SettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
     private static final String TAG = "SettingsActivity";
@@ -41,7 +40,6 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         loadSharedPreferences();
-        Log.d(TAG, "onCreate: color size : " +selectedFontColor+selectedFontSize);
 
         // Set up the views
         Button btnSave = findViewById(R.id.btnSaveSettings);
@@ -92,14 +90,11 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
 
     // load share preferences
     private void loadSharedPreferences(){
-        Log.d(TAG, "loadSharedPreferences: start");
         sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
         String colorf = sharedPreferences.getString(FONT_COLOR, "Black");
         selectedFontColor = sharedPreferences.getString(FONT_COLOR, "Black");
         int sizef = sharedPreferences.getInt(FONT_SIZE, 14);
         selectedFontSize = sharedPreferences.getInt(FONT_SIZE, 14);
-
-        Log.d(TAG, "loadSharedPreferences: " +colorf + sizef);
     }
     // update widget font color and size
     private void updateWidget(){
@@ -194,7 +189,6 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
 
     // Set the spinner to the correct position
     private void setFontSizeSpinnerPosition(){
-        Log.d(TAG, "setFontSizeSpinnerPosition: start");
         int len = fontSizeSpinner.getCount();
         for(int i = 0; i < len; i++){
             if(fontSizeSpinner.getItemAtPosition(i).equals(selectedFontSize)){

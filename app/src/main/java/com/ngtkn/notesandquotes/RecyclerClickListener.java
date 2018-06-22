@@ -9,7 +9,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 class RecyclerClickListener extends RecyclerView.SimpleOnItemTouchListener{
-    private static final String TAG = "RecyclerClickListener";
     private final OnRecyclerClickListener listener;
     private final GestureDetectorCompat gestureDetector;
 
@@ -23,10 +22,8 @@ class RecyclerClickListener extends RecyclerView.SimpleOnItemTouchListener{
         this.gestureDetector = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener(){
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                Log.d(TAG, "onSingleTapUp: starts");
                 View childView = recyclerView.findChildViewUnder(e.getX(),e.getY());
                 if(childView != null && listener != null) {
-                    Log.d(TAG, "onSingleTapUp: calling listener.onclick");
                     listener.onItemClick(childView, recyclerView.getChildAdapterPosition(childView));
                 }
                 return true;
@@ -34,10 +31,8 @@ class RecyclerClickListener extends RecyclerView.SimpleOnItemTouchListener{
 
             @Override
             public void onLongPress(MotionEvent e) {
-                Log.d(TAG, "onLongPress: start");
                 View childView = recyclerView.findChildViewUnder(e.getX(), e.getY());
                 if(childView != null && listener != null){
-                    Log.d(TAG, "onLongPress: calling listener.onlongclick");
                     listener.onItemLongClick(childView, recyclerView.getChildAdapterPosition(childView));
                 }
             }
