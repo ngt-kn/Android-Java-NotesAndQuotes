@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    android:padding="@dimen/widget_margin">
+    android:padding="@dimen/widget_margin"
+    android:gravity="center_horizontal">
 
     <TextView
         android:id="@+id/appwidget_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:background="@android:color/transparent"
         android:contentDescription="@string/appwidget_text"
-        android:gravity="top"
+        android:gravity="top|center"
         android:textAllCaps="false"
         android:textColor="#ffffff"
         android:textSize="18sp"

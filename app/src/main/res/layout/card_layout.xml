@@ -16,7 +16,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:padding="8dp"
-            app:cardCornerRadius="10dp">
+            android:background="@color/colorIcons"
+            app:cardCornerRadius="4dp">
 
             <TextView
                 android:id="@+id/notes_text_view"
@@ -24,6 +25,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:textSize="16sp"
+                android:textColor="@color/colorPrimaryText"
                 tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum" />
         </android.support.v7.widget.CardView>
     </ScrollView>

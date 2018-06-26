@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.AdapterView;
@@ -91,10 +90,10 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
     // load share preferences
     private void loadSharedPreferences(){
         sharedPreferences = getApplicationContext().getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
-        String colorf = sharedPreferences.getString(FONT_COLOR, "Black");
-        selectedFontColor = sharedPreferences.getString(FONT_COLOR, "Black");
-        int sizef = sharedPreferences.getInt(FONT_SIZE, 14);
-        selectedFontSize = sharedPreferences.getInt(FONT_SIZE, 14);
+        String colorf = sharedPreferences.getString(FONT_COLOR, "White");
+        selectedFontColor = sharedPreferences.getString(FONT_COLOR, colorf);
+        int sizef = sharedPreferences.getInt(FONT_SIZE, 18);
+        selectedFontSize = sharedPreferences.getInt(FONT_SIZE, sizef);
     }
     // update widget font color and size
     private void updateWidget(){
@@ -170,7 +169,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
         fontSizes.add(30);
         fontSizes.add(36);
 
-        ArrayAdapter<Integer> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fontSizes);
+        ArrayAdapter<Integer> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, fontSizes);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         fontSizeSpinner.setAdapter(arrayAdapter);
