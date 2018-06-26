@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -21,6 +22,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RemoteViews;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     static String newQuote = "";
     private static int widgetNotePosition;
     static SharedPreferences sharedPreferences;
+    InputMethodManager imm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     private void editNotes(String title, final String action, String body, final int position){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
 
         // Set up the input
@@ -149,15 +153,27 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                     recyclerViewAdapter.loadNewData(notes.getNoteList());
                     save();
                 }
+                imm.hideSoftInputFromWindow(input.getWindowToken(),0);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                imm.hideSoftInputFromWindow(input.getWindowToken(),0);
             }
         });
 
+        // Show soft keyboard
+        input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+                }
+            }
+        });
         builder.show();
     }
 
