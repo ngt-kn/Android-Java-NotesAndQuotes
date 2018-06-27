@@ -138,7 +138,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
             remoteViews.setTextViewTextSize(R.id.appwidget_text, TypedValue.COMPLEX_UNIT_SP, selectedFontSize);
         }
         // call the widget manager to update
-        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+
     }
 
     // load the available font colors in spinner

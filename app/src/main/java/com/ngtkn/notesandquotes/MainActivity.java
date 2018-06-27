@@ -1,12 +1,13 @@
 package com.ngtkn.notesandquotes;
 
+import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,11 +19,11 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,7 +34,10 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements RecyclerClickListener.OnRecyclerClickListener {
     private static final String TAG = "MainActivity";
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     static private Notes notes;
     static String newEntry = "";
     static String newQuote = "";
+    private static int newColor;
+    private static int fontSize;
     private static int widgetNotePosition;
     static SharedPreferences sharedPreferences;
     InputMethodManager imm;
@@ -87,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         }
     }
 
+    // On click listener for snack bar, display quote in widget
     class SnackbarDisplayListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -108,20 +115,28 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
+        switch(id) {
+            case R.id.action_settings:
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.action_add:
+                editNotes("Add New", ADD, "", 0);
+                return true;
+            case R.id.font_color:
+                fontColorDialog();
+                return true;
+            case R.id.font_size:
+                fontSizeDialog();
+                return true;
+            default:
+                break;
         }
 
-        if (id == R.id.action_add) {
-            editNotes("Add New", ADD, "", 0);
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
+    // Create an alert dialog for editing or creating a note
     private void editNotes(String title, final String action, String body, final int position){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
@@ -176,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         });
         builder.show();
     }
-
 
     private void loadNotes(){
         // Shows once when user first starts app
@@ -262,6 +276,99 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
         remoteViews.setTextViewText(R.id.appwidget_text, s);
         appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+    }
+
+    private void fontColorDialog(){
+        final CharSequence[] items = {"Red", "Blue", "Green","Yellow","White", "Gray", "Black"};
+        boolean[] itemChecked = new boolean[items.length];
+
+        Context context = this;
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
+        final ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Font colors")
+                .setSingleChoiceItems(items, items.length, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch(items[which].toString()){
+                            case "Red":
+                                newColor = Color.RED;
+                                break;
+                            case "Blue":
+                                newColor = Color.BLUE;
+                                break;
+                            case "Green":
+                                newColor = Color.GREEN;
+                                break;
+                            case "Yellow":
+                                newColor = Color.YELLOW;
+                                break;
+                            case "White":
+                                newColor = Color.WHITE;
+                                break;
+                            case "Gray":
+                                newColor = Color.GRAY;
+                                break;
+                            case "Black":
+                                newColor = Color.BLACK;
+                                break;
+                            default:
+                                newColor = Color.BLACK;
+                                break;
+                        }
+                    }
+                })
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        remoteViews.setTextColor(R.id.appwidget_text, newColor);
+                        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void fontSizeDialog(){
+        final CharSequence[] items = {"10", "12", "14","16","18", "24", "32"};
+        boolean[] itemChecked = new boolean[items.length];
+
+        Context context = this;
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
+        final ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Font colors")
+                .setSingleChoiceItems(items, items.length, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        fontSize = Integer.valueOf(items[which].toString());
+                    }
+                })
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        remoteViews.setTextViewTextSize(R.id.appwidget_text, TypedValue.COMPLEX_UNIT_SP, fontSize);
+                        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
 
