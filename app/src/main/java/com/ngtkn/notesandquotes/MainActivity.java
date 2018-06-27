@@ -1,14 +1,13 @@
 package com.ngtkn.notesandquotes;
 
-import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -18,15 +17,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -34,10 +32,10 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import static android.support.design.widget.BottomSheetBehavior.STATE_EXPANDED;
+import static android.support.design.widget.BottomSheetBehavior.STATE_HIDDEN;
 
 public class MainActivity extends AppCompatActivity implements RecyclerClickListener.OnRecyclerClickListener {
     private static final String TAG = "MainActivity";
@@ -47,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private final String FONT_COLOR = "FONT_COLOR";
     private final String FONT_SIZE = "FONT_SIZE";
     private RecyclerViewAdapter recyclerViewAdapter;
+    private LinearLayout bottomSheetLayout;
+    private BottomSheetBehavior bottomSheetBehavior;
+    static Snackbar snackbar;
     static private Notes notes;
     static String newEntry = "";
     static String newQuote = "";
@@ -64,12 +65,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         setSupportActionBar(toolbar);
         final Quotes quotes = new Quotes();
 
+        // init bottom sheet, set state to hidden
+        bottomSheetLayout = findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        bottomSheetBehavior.setState(STATE_HIDDEN);
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                bottomSheetBehavior.setState(STATE_HIDDEN);
                 newQuote = quotes.getNewQuote(MainActivity.this);
-                Snackbar snackbar = Snackbar.make(view, newQuote, Snackbar.LENGTH_LONG)
+                snackbar = Snackbar.make(view, newQuote, Snackbar.LENGTH_LONG)
                         .setAction("Action", null);
                 View snackbarView = snackbar.getView();
                 TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
@@ -79,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             }
         });
 
+        // init recycler view
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerViewAdapter = new RecyclerViewAdapter(this, new ArrayList<String>());
         recyclerView.setAdapter(recyclerViewAdapter);
@@ -216,57 +224,41 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     @Override
-    public void onItemClick(View view, int position) {
-        // TODO: ??
-    }
+    public void onItemClick(View view, final int position) {
+        if((null != snackbar) && (snackbar.isShown())){
+            snackbar.dismiss();
+        }
+        bottomSheetBehavior.setState(STATE_EXPANDED);
+        LinearLayout editNote = findViewById(R.id.editNote);
+        final LinearLayout deleteNote = findViewById(R.id.deleteNote);
+        LinearLayout displayNote = findViewById(R.id.displayNote);
 
-    @Override
-    public void onItemLongClick(final View view, final int position) {
-        // Set up the custom dialog for display, edit, and delete methods
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        View v = getLayoutInflater().inflate(R.layout.long_click_dialogue, null);
-        Button btnDisplay = v.findViewById(R.id.btnDisplay);
-        Button btnEdit = v.findViewById(R.id.btnEdit);
-        Button btnDelete = v.findViewById(R.id.btnDelete);
-        builder.setView(v);
-        final AlertDialog dialog = builder.create();
-
-        // Set onclicklistener for
-        btnDisplay.setOnClickListener(new View.OnClickListener() {
+        editNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editNotes("Edit", EDIT, notes.getNote(position), position);
+                bottomSheetBehavior.setState(STATE_HIDDEN);
+            }
+        });
+        deleteNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteNote(v, position);
+                bottomSheetBehavior.setState(STATE_HIDDEN);
+            }
+        });
+        displayNote.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateWidgetText(MainActivity.this, notes.getNote(position));
                 widgetNotePosition = position;
-                dialog.dismiss();
+                bottomSheetBehavior.setState(STATE_HIDDEN);
             }
-        });
+        }));
+    }
 
-        btnEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editNotes("Edit", EDIT, notes.getNote(position), position);
-                dialog.dismiss();
-            }
-        });
-
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(position < notes.getSize()){
-                    notes.deleteNote(position);
-                    save();
-                    recyclerViewAdapter.loadNewData(notes.getNoteList());
-                    if(position == widgetNotePosition){
-                        updateWidgetText(MainActivity.this, "...");
-                        widgetNotePosition = -1;
-                    } else if (position < widgetNotePosition){
-                        widgetNotePosition -= 1;
-                    }
-                }
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
+    @Override
+    public void onItemLongClick(final View view, final int position) {
     }
     void updateWidgetText(Context context, String s){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -366,5 +358,35 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-}
 
+    private void deleteNote(View view, final int position){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete")
+                .setMessage("Do you want to delete?")
+                .setIcon(R.drawable.ic_delete_24dp)
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(position < notes.getSize()) {
+                            notes.deleteNote(position);
+                            save();
+                            recyclerViewAdapter.loadNewData(notes.getNoteList());
+                            if (position == widgetNotePosition) {
+                                updateWidgetText(MainActivity.this, "...");
+                                widgetNotePosition = -1;
+                            } else if (position < widgetNotePosition) {
+                                widgetNotePosition -= 1;
+                            }
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+}

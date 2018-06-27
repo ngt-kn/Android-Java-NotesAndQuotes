@@ -9,4 +9,8 @@
     <string name="widget_font_sizes">Widget Font Sizes</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="select_action">Select Action</string>
+    <string name="edit">Edit</string>
+    <string name="display_in_widget">Display In Widget</string>
+    <string name="delete">Delete</string>
 </resources>

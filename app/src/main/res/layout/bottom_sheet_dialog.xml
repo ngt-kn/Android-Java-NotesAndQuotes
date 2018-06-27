@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="?android:attr/actionBarSize">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:text="@string/select_action"
+        android:gravity="center_vertical"/>
+
+    <LinearLayout
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true"
+        android:id="@+id/editNote"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:contentDescription="@string/edit"
+            android:src="@drawable/ic_edit_black_24dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:text="@string/edit"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true"
+        android:id="@+id/deleteNote"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:contentDescription="@string/delete"
+            android:src="@drawable/ic_delete_24dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:text="@string/delete"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true"
+        android:id="@+id/displayNote"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:contentDescription="@string/display_in_widget"
+            android:src="@drawable/ic_input_24dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:text="@string/display_in_widget"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp"/>
+    </LinearLayout>
+
+</LinearLayout>
