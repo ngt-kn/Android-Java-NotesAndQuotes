@@ -15,11 +15,6 @@
         android:title="Widget Font Size"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_black_24dp"
-        android:orderInCategory="104"
-        android:title="@string/action_settings" />
-    <item
         android:id="@+id/font_color"
         android:icon="@drawable/ic_format_color_text_black_24dp"
         android:orderInCategory="101"

@@ -5,4 +5,8 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="widget_font_colors">Widget Font Colors</string>
+    <string name="widget_font_sizes">Widget Font Sizes</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

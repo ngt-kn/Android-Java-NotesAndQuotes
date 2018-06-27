@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private static final String ADD = "ADD";
     private static final String EDIT = "EDIT";
     private static final String ID = "NOTES";
+    private final String FONT_COLOR = "FONT_COLOR";
+    private final String FONT_SIZE = "FONT_SIZE";
     private RecyclerViewAdapter recyclerViewAdapter;
     static private Notes notes;
     static String newEntry = "";
@@ -116,10 +118,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         int id = item.getItemId();
 
         switch(id) {
-            case R.id.action_settings:
-                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivity(intent);
-                return true;
             case R.id.action_add:
                 editNotes("Add New", ADD, "", 0);
                 return true;
@@ -185,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             public void onFocusChange(View v, boolean hasFocus) {
                 if(hasFocus){
                     imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+                    if(imm != null) imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                 }
             }
         });
@@ -280,15 +278,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     private void fontColorDialog(){
         final CharSequence[] items = {"Red", "Blue", "Green","Yellow","White", "Gray", "Black"};
-        boolean[] itemChecked = new boolean[items.length];
-
         Context context = this;
         final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
         final ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Font colors")
+        builder.setTitle(R.string.widget_font_colors)
                 .setSingleChoiceItems(items, items.length, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -320,14 +316,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                         }
                     }
                 })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         remoteViews.setTextColor(R.id.appwidget_text, newColor);
                         appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+                        sharedPreferences.edit().putInt(FONT_COLOR, newColor).apply();
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -339,29 +336,28 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     private void fontSizeDialog(){
         final CharSequence[] items = {"10", "12", "14","16","18", "24", "32"};
-        boolean[] itemChecked = new boolean[items.length];
-
         Context context = this;
         final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
         final ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Font colors")
+        builder.setTitle(R.string.widget_font_sizes)
                 .setSingleChoiceItems(items, items.length, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         fontSize = Integer.valueOf(items[which].toString());
                     }
                 })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         remoteViews.setTextViewTextSize(R.id.appwidget_text, TypedValue.COMPLEX_UNIT_SP, fontSize);
                         appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+                        sharedPreferences.edit().putInt(FONT_SIZE, fontSize).apply();
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();

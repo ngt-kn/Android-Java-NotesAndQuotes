@@ -31,15 +31,6 @@
                 android:resource="@xml/display_widget_info" />
         </receiver>
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ngtkn.notesandquotes.MainActivity" />
-        </activity>
     </application>
 
 </manifest>
