@@ -16,7 +16,6 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Notes
     private ArrayList<String> notes;
     private Context context;
 
-
     public RecyclerViewAdapter(Context context, ArrayList<String> notes) {
         this.notes = notes;
         this.context = context;
