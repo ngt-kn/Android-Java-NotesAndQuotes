@@ -170,6 +170,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                     }
                     if(action.equals(EDIT)){
                         notes.editNote(newEntry, position);
+                        if(widgetNotePosition==position){
+                            updateWidgetText(MainActivity.this, newEntry);
+                        }
                     }
                     recyclerViewAdapter.loadNewData(notes.getNoteList());
                     save();
