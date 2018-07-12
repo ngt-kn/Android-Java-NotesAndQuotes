@@ -27,6 +27,7 @@
                 android:title="Widget Font Size" />
         </menu>
     </item>
+
     <item
         android:id="@+id/app_bar_switch"
         android:title="Night Mode"

@@ -12,6 +12,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -19,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -29,9 +31,11 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +67,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
+    // Widget
+    private static AppWidgetManager appWidgetManager;
+    private static RemoteViews remoteViews;
+    private static ComponentName displayWidget;
     // Vars
     static private Notes notes;
     static String newEntry = "";
@@ -71,14 +79,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private static int newColor;
     private static int fontSize;
     private static int widgetNotePosition;
+
     static SharedPreferences sharedPreferences;
     InputMethodManager imm;
     ColorPickerDialog pickerDialog;
 
-    private static AppWidgetManager appWidgetManager;
-    private static RemoteViews remoteViews;
-    private static ComponentName displayWidget;
-
+    Switch themeSwitch;
 
 
     @Override
@@ -98,6 +104,19 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setupDrawerContent(navigationView);
+
+        // Set up oncheck listener for day/night mode switch
+        Menu menu = navigationView.getMenu();
+        MenuItem item = menu.findItem(R.id.app_bar_switch);
+        View actionToggleView = item.getActionView();
+        themeSwitch = actionToggleView.findViewById(R.id.switch1);
+        themeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.i("switch", "onCheckedChanged: " + isChecked);
+            }
+        });
+
 
         appWidgetManager = AppWidgetManager.getInstance(this);
         remoteViews = new RemoteViews(this.getPackageName(), R.layout.display_widget);
