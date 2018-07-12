@@ -12,20 +12,16 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -38,7 +34,6 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import net.margaritov.preference.colorpicker.ColorPickerDialog;
 
@@ -60,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     private static final String FONT_SIZE = "FONT_SIZE";
     private static final String APP_FONT_COLOR = "APP_FONT_COLOR";
     private static final String APP_FONT_SIZE = "APP_FONT_SIZE";
+    private static final String NIGHT = "NIGHT";
     // Menus, sheets, etc
     private RecyclerViewAdapter recyclerViewAdapter;
     private BottomSheetBehavior bottomSheetBehavior;
@@ -67,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     // Navigation Drawer
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
-    private NavigationView navigationView;
     // Widget
     private static AppWidgetManager appWidgetManager;
     private static RemoteViews remoteViews;
@@ -77,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     static String newEntry = "";
     static String newQuote = "";
     static boolean showInstructions;
-    private static int newColor;
     private static int fontSize;
     private static int widgetNotePosition;
 
@@ -90,11 +84,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if(AppCompatDelegate.getDefaultNightMode()==AppCompatDelegate.MODE_NIGHT_YES){
+        sharedPreferences = getApplicationContext()
+                .getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
+        boolean nightMode = sharedPreferences.getBoolean(NIGHT, false);
+
+        if(nightMode){
             setTheme(R.style.DarkTheme);
         } else {
             setTheme(R.style.AppTheme);
         }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -104,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
         final Quotes quotes = new Quotes();
 
-        navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         drawerLayout = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.Open, R.string.Close);
         drawerLayout.addDrawerListener(toggle);
@@ -112,12 +111,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setupDrawerContent(navigationView);
 
-        // Set up oncheck listener for day/night mode switch
+        // Set up onchecklistener for day/night mode switch
         Menu menu = navigationView.getMenu();
         MenuItem item = menu.findItem(R.id.app_bar_switch);
         View actionToggleView = item.getActionView();
         themeSwitch = actionToggleView.findViewById(R.id.switch1);
-        if(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+        if(nightMode){
             themeSwitch.setChecked(true);
         }
         themeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -125,9 +124,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    sharedPreferences.edit().putBoolean(NIGHT, true).apply();
                     recreate();
                 } else {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    sharedPreferences.edit().putBoolean(NIGHT, false).apply();
                     recreate();
                 }
             }
@@ -200,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch(id) {
+        switch (id) {
             case R.id.action_add:
                 editNotes("Add New", ADD, "", 0);
                 return true;
@@ -208,11 +209,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                 break;
         }
         // For drawer action bar button
-        if(toggle.onOptionsItemSelected(item)){
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     /* Notes actions */
@@ -318,8 +315,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     private void loadSharedPreferences(){
-        sharedPreferences = getApplicationContext()
-                .getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
         try {
             JSONArray jsonArray = new JSONArray(sharedPreferences.getString(ID, "[]"));
             int len = jsonArray.length();
@@ -417,7 +412,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (selection == 1) {
-                            //TODO: save fontsize to sharedpref
                             recyclerViewAdapter.dynamicTextSize = fontSize;
                             recyclerViewAdapter.notifyDataSetChanged();
                             sharedPreferences.edit().putInt(APP_FONT_SIZE, fontSize).apply();
@@ -440,9 +434,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     // selection determines if changes are made to app (1) or widget font size (2)
     private void fontColorPicker(final int selection){
-
-        Context context = this;
-
         int fontColor;
         if(selection==0){
             fontColor = sharedPreferences.getInt(APP_FONT_COLOR, Color.parseColor("#000000"));
@@ -471,10 +462,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         pickerDialog.show();
     }
 
-
     /* Nav drawer */
     public void selectItemDrawer(MenuItem menuItem){
-
         switch (menuItem.getItemId()){
             case R.id.nav_font_color:
                 fontColorPicker(1);
@@ -491,7 +480,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             default:
                 break;
         }
-
         drawerLayout.closeDrawers();
     }
 
