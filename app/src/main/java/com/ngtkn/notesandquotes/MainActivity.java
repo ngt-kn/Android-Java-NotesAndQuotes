@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -89,8 +90,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if(AppCompatDelegate.getDefaultNightMode()==AppCompatDelegate.MODE_NIGHT_YES){
+            setTheme(R.style.DarkTheme);
+        } else {
+            setTheme(R.style.AppTheme);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -110,10 +118,19 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         MenuItem item = menu.findItem(R.id.app_bar_switch);
         View actionToggleView = item.getActionView();
         themeSwitch = actionToggleView.findViewById(R.id.switch1);
+        if(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+            themeSwitch.setChecked(true);
+        }
         themeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i("switch", "onCheckedChanged: " + isChecked);
+                if(isChecked){
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    recreate();
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    recreate();
+                }
             }
         });
 
@@ -458,8 +475,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     /* Nav drawer */
     public void selectItemDrawer(MenuItem menuItem){
-        android.support.v4.app.Fragment fragment = null;
-        Class fragmentClass;
 
         switch (menuItem.getItemId()){
             case R.id.nav_font_color:
