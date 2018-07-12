@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         } else {
             setTheme(R.style.AppTheme);
         }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
