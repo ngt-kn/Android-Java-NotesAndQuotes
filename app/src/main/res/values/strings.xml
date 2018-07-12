@@ -13,4 +13,7 @@
     <string name="edit">Edit</string>
     <string name="display_in_widget">Display In Widget</string>
     <string name="delete">Delete</string>
+    <string name="Open">Open</string>
+    <string name="Close">Close</string>
+    <string name="add">Add</string>
 </resources>

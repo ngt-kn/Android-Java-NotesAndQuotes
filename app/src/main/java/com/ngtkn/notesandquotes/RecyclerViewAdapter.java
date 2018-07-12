@@ -1,6 +1,7 @@
 package com.ngtkn.notesandquotes;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,10 +16,14 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Notes
     private static final String TAG = "RecyclerViewAdapter";
     private ArrayList<String> notes;
     private Context context;
+    int dynamicTextSize;
+    int dynamicTextColor;
 
     public RecyclerViewAdapter(Context context, ArrayList<String> notes) {
         this.notes = notes;
         this.context = context;
+        this.dynamicTextSize = 14;
+        this.dynamicTextColor = Color.parseColor("#000000");
     }
 
     @NonNull
@@ -34,6 +39,9 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Notes
     public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
         // Called by recycler view for new data to be stored in a view holder, to display
         holder.noteView.setText(notes.get(position));
+        holder.noteView.setTextSize(dynamicTextSize);
+        holder.noteView.setTextColor(dynamicTextColor);
+
     }
 
     @Override

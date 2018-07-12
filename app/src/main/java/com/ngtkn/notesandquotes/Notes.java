@@ -1,13 +1,12 @@
 package com.ngtkn.notesandquotes;
 
-import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 class Notes extends ArrayList<String> {
-    static ArrayList<String> notes;
+    private static ArrayList<String> notes;
 
-    public Notes() {
+    Notes() {
         notes = new ArrayList<>();
     }
 

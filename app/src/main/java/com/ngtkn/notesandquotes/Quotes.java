@@ -2,8 +2,6 @@ package com.ngtkn.notesandquotes;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,21 +11,22 @@ import java.util.ArrayList;
 import java.util.Random;
 
 class Quotes {
-    static ArrayList<String> quotes;
+    private static ArrayList<String> quotes;
     private int index = -1;
 
-    public Quotes() {
+    Quotes() {
         this.quotes = new ArrayList<>();
     }
 
     // Read in quotes from txt file and store in arraylist
-    void loadFromText(Context context){
+    private void loadFromText(Context context){
         try{
             AssetManager asset = context.getAssets();
             InputStream in = asset.open("quotes.txt");
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String line = bufferedReader.readLine();
+            bufferedReader.readLine();
+            String line;
             while ((line=bufferedReader.readLine()) != null){
                 quotes.add(line);
             }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item android:title="App Font Settings">
+        <item
+            android:id="@+id/nav_font_color"
+            android:icon="@drawable/ic_format_color_text_black_24dp"
+            android:title="Font Color" />
+        <item
+            android:id="@+id/nav_font_size"
+            android:icon="@drawable/ic_format_size_black_24dp"
+            android:title="Font Size" />
+    </item>
+
+    <item android:title="Widget Settings">
+        <menu>
+            <item
+                android:id="@+id/nav_widget_color"
+                android:icon="@drawable/ic_format_color_text_black_24dp"
+                android:title="Widget Font Color" />
+            <item
+                android:id="@+id/nav_widget_size"
+                android:icon="@drawable/ic_format_size_black_24dp"
+                android:title="Widget Font Size" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/app_bar_switch"
+        android:title="Night Mode"
+        app:actionLayout="@layout/switch_item"
+        android:icon="@drawable/ic_night"/>
+
+</menu>

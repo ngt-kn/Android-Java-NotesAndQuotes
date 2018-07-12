@@ -7,16 +7,22 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -27,7 +33,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import net.margaritov.preference.colorpicker.ColorPickerDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,35 +46,65 @@ import static android.support.design.widget.BottomSheetBehavior.STATE_EXPANDED;
 import static android.support.design.widget.BottomSheetBehavior.STATE_HIDDEN;
 
 public class MainActivity extends AppCompatActivity implements RecyclerClickListener.OnRecyclerClickListener {
-    private static final String TAG = "MainActivity";
+    // Const keys for shared prefs
     private static final String ADD = "ADD";
     private static final String EDIT = "EDIT";
     private static final String ID = "NOTES";
-    private final String FONT_COLOR = "FONT_COLOR";
-    private final String FONT_SIZE = "FONT_SIZE";
+    private static final String SHOW_INSTRUCTIONS = "SHOW";
+    private static final String FONT_COLOR = "FONT_COLOR";
+    private static final String FONT_SIZE = "FONT_SIZE";
+    private static final String APP_FONT_COLOR = "APP_FONT_COLOR";
+    private static final String APP_FONT_SIZE = "APP_FONT_SIZE";
+    // Menus, sheets, etc
     private RecyclerViewAdapter recyclerViewAdapter;
-    private LinearLayout bottomSheetLayout;
     private BottomSheetBehavior bottomSheetBehavior;
     static Snackbar snackbar;
+    // Navigation Drawer
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle toggle;
+    private NavigationView navigationView;
+    // Vars
     static private Notes notes;
     static String newEntry = "";
     static String newQuote = "";
+    static boolean showInstructions;
     private static int newColor;
     private static int fontSize;
     private static int widgetNotePosition;
     static SharedPreferences sharedPreferences;
     InputMethodManager imm;
+    ColorPickerDialog pickerDialog;
+
+    private static AppWidgetManager appWidgetManager;
+    private static RemoteViews remoteViews;
+    private static ComponentName displayWidget;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         final Quotes quotes = new Quotes();
 
+        navigationView = findViewById(R.id.nav_view);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.Open, R.string.Close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setupDrawerContent(navigationView);
+
+        appWidgetManager = AppWidgetManager.getInstance(this);
+        remoteViews = new RemoteViews(this.getPackageName(), R.layout.display_widget);
+        displayWidget = new ComponentName(this, DisplayWidget.class);
+
         // init bottom sheet, set state to hidden
-        bottomSheetLayout = findViewById(R.id.bottom_sheet);
+        LinearLayout bottomSheetLayout = findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetBehavior.setState(STATE_HIDDEN);
 
@@ -96,8 +134,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         notes = new Notes();
         loadSharedPreferences();
 
-        if(notes.getSize() == 0){
-            loadNotes();
+        if(showInstructions){
+            loadInstructions();
         } else {
             recyclerViewAdapter.loadNewData(notes.getNoteList());
         }
@@ -111,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             widgetNotePosition = -1;
         }
     }
+
+    /* Toolbar menu */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -129,19 +169,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             case R.id.action_add:
                 editNotes("Add New", ADD, "", 0);
                 return true;
-            case R.id.font_color:
-                fontColorDialog();
-                return true;
-            case R.id.font_size:
-                fontSizeDialog();
-                return true;
             default:
                 break;
+        }
+        // For drawer action bar button
+        if(toggle.onOptionsItemSelected(item)){
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    /* Notes actions */
     // Create an alert dialog for editing or creating a note
     private void editNotes(String title, final String action, String body, final int position){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -201,10 +240,46 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         builder.show();
     }
 
-    private void loadNotes(){
+    private void deleteNote(View view, final int position){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete")
+                .setMessage("Do you want to delete?")
+                .setIcon(R.drawable.ic_delete_24dp)
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(position < notes.getSize()) {
+                            notes.deleteNote(position);
+                            save();
+                            recyclerViewAdapter.loadNewData(notes.getNoteList());
+                            if (position == widgetNotePosition) {
+                                updateWidgetText(MainActivity.this, "...");
+                                widgetNotePosition = -1;
+                            } else if (position < widgetNotePosition) {
+                                widgetNotePosition -= 1;
+                            }
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /* Shared prefs */
+    private void loadInstructions(){
         // Shows once when user first starts app
-        notes.addNewNote("Add a new note with + in toolbar. Generate a quote with floating button located at bottom.");
+        notes.addNewNote("Add a new note with +.\n\n" +
+                "Change widget font size and color with items in toolbar.\n\n" +
+                "Select a note to edit, delete, or display in widget.\n\n" +
+                "Generate a quote with floating button located at bottom. Select display to show in widget");
         recyclerViewAdapter.loadNewData(notes.getNoteList());
+        sharedPreferences.edit().putBoolean(SHOW_INSTRUCTIONS, false).apply();
     }
 
     private void loadSharedPreferences(){
@@ -219,6 +294,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        showInstructions = sharedPreferences.getBoolean(SHOW_INSTRUCTIONS, true);
+        recyclerViewAdapter.dynamicTextSize = sharedPreferences.getInt(APP_FONT_SIZE, 14);
+        recyclerViewAdapter.dynamicTextColor =
+                sharedPreferences.getInt(APP_FONT_COLOR, Color.parseColor("#000000"));
+
+        remoteViews.setTextColor(R.id.appwidget_text, sharedPreferences.getInt(FONT_COLOR,
+                Color.parseColor("#000000")));
+        remoteViews.setTextViewTextSize(R.id.appwidget_text, TypedValue.COMPLEX_UNIT_SP,
+                sharedPreferences.getInt(FONT_SIZE, 14));
+        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+
     }
 
     private void save(){
@@ -226,6 +312,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         sharedPreferences.edit().putString(ID, jsonArray.toString()).apply();
     }
 
+
+    /* Recyclerview click listeners */
     @Override
     public void onItemClick(View view, final int position) {
         if((null != snackbar) && (snackbar.isShown())){
@@ -263,6 +351,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     @Override
     public void onItemLongClick(final View view, final int position) {
     }
+
+    /* widget */
     void updateWidgetText(Context context, String s){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
@@ -271,66 +361,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         appWidgetManager.updateAppWidget(displayWidget, remoteViews);
     }
 
-    private void fontColorDialog(){
-        final CharSequence[] items = {"Red", "Blue", "Green","Yellow","White", "Gray", "Black"};
-        Context context = this;
-        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
-        final ComponentName displayWidget = new ComponentName(context, DisplayWidget.class);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle(R.string.widget_font_colors)
-                .setSingleChoiceItems(items, items.length, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch(items[which].toString()){
-                            case "Red":
-                                newColor = Color.RED;
-                                break;
-                            case "Blue":
-                                newColor = Color.BLUE;
-                                break;
-                            case "Green":
-                                newColor = Color.GREEN;
-                                break;
-                            case "Yellow":
-                                newColor = Color.YELLOW;
-                                break;
-                            case "White":
-                                newColor = Color.WHITE;
-                                break;
-                            case "Gray":
-                                newColor = Color.GRAY;
-                                break;
-                            case "Black":
-                                newColor = Color.BLACK;
-                                break;
-                            default:
-                                newColor = Color.BLACK;
-                                break;
-                        }
-                    }
-                })
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        remoteViews.setTextColor(R.id.appwidget_text, newColor);
-                        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
-                        sharedPreferences.edit().putInt(FONT_COLOR, newColor).apply();
-                    }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void fontSizeDialog(){
-        final CharSequence[] items = {"10", "12", "14","16","18", "24", "32"};
+    /* Settings dialogs*/
+    // selection determines if changes are made to app (1) or widget font size (2)
+    private void fontSizeDialog(final int selection){
+        final CharSequence[] items = {"10", "12", "14", "16","18", "24", "32"};
         Context context = this;
         final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.display_widget);
@@ -347,9 +381,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        remoteViews.setTextViewTextSize(R.id.appwidget_text, TypedValue.COMPLEX_UNIT_SP, fontSize);
-                        appWidgetManager.updateAppWidget(displayWidget, remoteViews);
-                        sharedPreferences.edit().putInt(FONT_SIZE, fontSize).apply();
+                        if (selection == 1) {
+                            //TODO: save fontsize to sharedpref
+                            recyclerViewAdapter.dynamicTextSize = fontSize;
+                            recyclerViewAdapter.notifyDataSetChanged();
+                            sharedPreferences.edit().putInt(APP_FONT_SIZE, fontSize).apply();
+                        } else {
+                            remoteViews.setTextViewTextSize(R.id.appwidget_text, TypedValue.COMPLEX_UNIT_SP, fontSize);
+                            appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+                            sharedPreferences.edit().putInt(FONT_SIZE, fontSize).apply();
+                        }
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -362,34 +403,73 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         dialog.show();
     }
 
-    private void deleteNote(View view, final int position){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete")
-                .setMessage("Do you want to delete?")
-                .setIcon(R.drawable.ic_delete_24dp)
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if(position < notes.getSize()) {
-                            notes.deleteNote(position);
-                            save();
-                            recyclerViewAdapter.loadNewData(notes.getNoteList());
-                            if (position == widgetNotePosition) {
-                                updateWidgetText(MainActivity.this, "...");
-                                widgetNotePosition = -1;
-                            } else if (position < widgetNotePosition) {
-                                widgetNotePosition -= 1;
-                            }
-                        }
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    // selection determines if changes are made to app (1) or widget font size (2)
+    private void fontColorPicker(final int selection){
+
+        Context context = this;
+
+        int fontColor;
+        if(selection==0){
+            fontColor = sharedPreferences.getInt(APP_FONT_COLOR, Color.parseColor("#000000"));
+        } else {
+            fontColor = sharedPreferences.getInt(FONT_COLOR, Color.parseColor("#000000"));
+        }
+
+        pickerDialog = new ColorPickerDialog(MainActivity.this, fontColor);
+        pickerDialog.setAlphaSliderVisible(true);
+        pickerDialog.setTitle("Color Picker");
+
+        pickerDialog.setOnColorChangedListener(new ColorPickerDialog.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int color) {
+                if(selection == 1) {
+                    recyclerViewAdapter.dynamicTextColor = color;
+                    recyclerViewAdapter.notifyDataSetChanged();
+                    sharedPreferences.edit().putInt(APP_FONT_COLOR, color).apply();
+                } else {
+                    remoteViews.setTextColor(R.id.appwidget_text, color);
+                    appWidgetManager.updateAppWidget(displayWidget, remoteViews);
+                    sharedPreferences.edit().putInt(FONT_COLOR, color).apply();
+                }
+            }
+        });
+        pickerDialog.show();
     }
+
+
+    /* Nav drawer */
+    public void selectItemDrawer(MenuItem menuItem){
+        android.support.v4.app.Fragment fragment = null;
+        Class fragmentClass;
+
+        switch (menuItem.getItemId()){
+            case R.id.nav_font_color:
+                fontColorPicker(1);
+                break;
+            case R.id.nav_font_size:
+                fontSizeDialog(1);
+                break;
+            case R.id.nav_widget_color:
+                fontColorPicker(2);
+                break;
+            case R.id.nav_widget_size:
+                fontSizeDialog(2);
+                break;
+            default:
+                break;
+        }
+
+        drawerLayout.closeDrawers();
+    }
+
+    private void setupDrawerContent(NavigationView navigationView){
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                selectItemDrawer(item);
+                return true;
+            }
+        });
+    }
+
 }
