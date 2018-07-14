@@ -14,10 +14,6 @@ class Notes extends ArrayList<String> {
         return notes;
     }
 
-    void setNotes(ArrayList<String> notes) {
-        this.notes = notes;
-    }
-
     public String getNote(int position){
         return notes.get(position);
     }

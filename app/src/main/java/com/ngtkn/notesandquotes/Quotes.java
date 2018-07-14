@@ -15,7 +15,7 @@ class Quotes {
     private int index = -1;
 
     Quotes() {
-        this.quotes = new ArrayList<>();
+        quotes = new ArrayList<>();
     }
 
     // Read in quotes from txt file and store in arraylist

@@ -78,16 +78,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     static SharedPreferences sharedPreferences;
     InputMethodManager imm;
     ColorPickerDialog pickerDialog;
-
     Switch themeSwitch;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Set night/day mode
         sharedPreferences = getApplicationContext()
                 .getSharedPreferences("com.ngtkn.notesandquotes", Context.MODE_PRIVATE);
         boolean nightMode = sharedPreferences.getBoolean(NIGHT, false);
-
         if(nightMode){
             setTheme(R.style.DarkTheme);
         } else {
@@ -101,8 +99,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final Quotes quotes = new Quotes();
-
+        // Setup the navigation drawer
         NavigationView navigationView = findViewById(R.id.nav_view);
         drawerLayout = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.Open, R.string.Close);
@@ -134,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             }
         });
 
-
+        // init widget, remote views
         appWidgetManager = AppWidgetManager.getInstance(this);
         remoteViews = new RemoteViews(this.getPackageName(), R.layout.display_widget);
         displayWidget = new ComponentName(this, DisplayWidget.class);
@@ -144,6 +141,25 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetBehavior.setState(STATE_HIDDEN);
 
+        // init recycler view
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerViewAdapter = new RecyclerViewAdapter(this, new ArrayList<String>());
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addOnItemTouchListener(new RecyclerClickListener(this, recyclerView, this));
+
+        // load shared preferences
+        notes = new Notes();
+        loadSharedPreferences();
+        // show instructions if 1st run, else load the stored notes
+        if(showInstructions){
+            loadInstructions();
+        } else {
+            recyclerViewAdapter.loadNewData(notes.getNoteList());
+        }
+
+        // Setup the FAB for generating quotes
+        final Quotes quotes = new Quotes();
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,22 +175,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
                 snackbar.show();
             }
         });
-
-        // init recycler view
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, new ArrayList<String>());
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addOnItemTouchListener(new RecyclerClickListener(this, recyclerView, this));
-
-        notes = new Notes();
-        loadSharedPreferences();
-
-        if(showInstructions){
-            loadInstructions();
-        } else {
-            recyclerViewAdapter.loadNewData(notes.getNoteList());
-        }
     }
 
     // On click listener for snack bar, display quote in widget
@@ -272,6 +272,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
         builder.show();
     }
 
+    // Create an alert dialog for deleting a note
+    // TODO: Remove View param, not used in this version
     private void deleteNote(View view, final int position){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete")
@@ -304,17 +306,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
     }
 
     /* Shared prefs */
+    // load instructions for first run
     private void loadInstructions(){
         // Shows once when user first starts app
         notes.addNewNote("Add a new note with +.\n\n" +
-                "Change widget font size and color with items in toolbar.\n\n" +
+                "Change settings in toolbar.\n\n" +
                 "Select a note to edit, delete, or display in widget.\n\n" +
                 "Generate a quote with floating button located at bottom. Select display to show in widget");
         recyclerViewAdapter.loadNewData(notes.getNoteList());
         sharedPreferences.edit().putBoolean(SHOW_INSTRUCTIONS, false).apply();
     }
 
+    // Load shared prefs
     private void loadSharedPreferences(){
+        // Convert JSONarray back to arraylist
         try {
             JSONArray jsonArray = new JSONArray(sharedPreferences.getString(ID, "[]"));
             int len = jsonArray.length();
@@ -325,6 +330,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             e.printStackTrace();
         }
         showInstructions = sharedPreferences.getBoolean(SHOW_INSTRUCTIONS, true);
+        // Load font size/color preferences
         recyclerViewAdapter.dynamicTextSize = sharedPreferences.getInt(APP_FONT_SIZE, 14);
         recyclerViewAdapter.dynamicTextColor =
                 sharedPreferences.getInt(APP_FONT_COLOR, Color.parseColor("#000000"));
@@ -337,11 +343,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
 
     }
 
+    // Save note to shared pref
     private void save(){
+        // Convert array list to a serializable JSONarray
         JSONArray jsonArray = new JSONArray(notes.getNoteList());
+        // save
         sharedPreferences.edit().putString(ID, jsonArray.toString()).apply();
     }
-
 
     /* Recyclerview click listeners */
     @Override
@@ -492,5 +500,4 @@ public class MainActivity extends AppCompatActivity implements RecyclerClickList
             }
         });
     }
-
 }
